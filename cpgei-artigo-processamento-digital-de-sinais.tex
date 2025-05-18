@@ -9,10 +9,36 @@
 \usepackage{algorithmic}
 \usepackage{graphicx}
 \usepackage{textcomp}
+\usepackage{listings}
+\usepackage{xcolor}
 \usepackage{xcolor}
 \usepackage[main=brazil,english]{babel}
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+% Código fonte MATLAB
+\definecolor{darkgreen}{rgb}{0.0, 0.5, 0.0}
+\renewcommand{\lstlistingname}{Código}
+\lstset{
+	basicstyle=\ttfamily\footnotesize, % Fonte monoespaçada e pequena
+	numbers=none,                     % Números de linha à esquerda
+	numberstyle=\tiny,                % Tamanho dos números de linha
+	stepnumber=1,                     % Incremento dos números
+	numbersep=5pt,                    % Distância dos números para o código
+	backgroundcolor=\color{lightgray!10}, % Fundo cinza claro
+	frame=single,                     % Moldura ao redor do código
+	tabsize=4,                        % Tamanho da tabulação
+	captionpos=b,                     % Posição da legenda (bottom)
+	breaklines=true,                  % Quebra de linha automática
+	breakatwhitespace=false,          % Quebra de linha mesmo no meio de palavras
+	showspaces=false,                 % Não mostrar espaços
+	showstringspaces=false,           % Não mostrar espaços em strings
+	keywordstyle=\color{blue},        % Cor para palavras-chave
+	commentstyle=\color{darkgreen},       % Cor para comentários
+	stringstyle=\color{purple},       % Cor para strings
+	language=Matlab                   % Linguagem do código
+}
+
 \begin{document}
 
 \title{
@@ -101,8 +127,6 @@ Os bicos injetores desempenham uma função fundamental nos sistemas de combust�
 
 Nesse contexto, este trabalho tem como objetivo demonstrar a aplicação de técnicas de processamento de imagens para detectar furos na superfície de vedação de bicos injetores diesel, uma área estratégica para a gravação a laser com fins de rastreabilidade. O artigo está organizado da seguinte forma: na Seção 2.A, é apresentada uma breve explicação sobre os bicos injetores; an Seção 2.B, são descritas as técnicas de processamento de imagens utilizadas; por fim, a Seção de Considerações Finais encerra o artigo, destacando as contribuições do estudo.
 
-\cite{karhub}
-
 \section{Metodologia}
 \subsection{Bico Injetor Diesel}
 
@@ -119,7 +143,7 @@ A Figura \ref{fig:bico-injetor} destaca as seguintes regiões do bico injetor: b
  
 \begin{figure}[t]
 	\centering
-	\includegraphics[scale=0.4]{Images/bico-injetor.png}
+	\includegraphics[scale=0.35]{Images/bico-injetor.png}
 	\caption{Componentes de um bico injetor diesel. Fonte: \cite{Girotto2023}.}
 	\label{fig:bico-injetor}
 \end{figure}
@@ -130,6 +154,55 @@ A Figura \ref{fig:bico-injetor} destaca as seguintes regiões do bico injetor: b
 	\caption{Bico injetor diesel}
 	\label{fig:superficie-de-vedacao}
 \end{figure}
+
+\subsection{Processamento de Imagem}
+
+Nesta seção, são abordadas as técnicas de processamento de imagem utilizadas para detecção dos furos presentes na superfície de vedação do bico injetor, utilizando o \textit{software} Matlab.  
+
+\subsubsection{Carregar imagem} esta seção de código descreve as etapas para o carregamento e a visualização da imagem. No código apresentado, foi carregada uma imagem correspondente à Figura \ref{fig:superficie-de-vedacao}. 
+
+\begin{lstlisting}[caption={Carregar e visualizar a imagem}, label={lst:codigo}]
+	% Clear workspace
+	clear
+	
+	% Set working directory
+	workDir = pwd + "/ProjetoFinal/Images/";
+	
+	% Read image
+	imName = "Image0001.jpg";
+	imNozzle = imread(workDir + imName);
+	
+	% Show image
+	imshow(imNozzle);
+\end{lstlisting}
+
+\subsection{Filtrar a imagem} esta seção de código descreve as etapas para pré-processamento da imagem, utilizando filtros.
+
+\begin{lstlisting}[caption={Carregar e visualizar a imagem}, label={lst:codigo}]
+	% Create structuring element
+	se = strel('disk', 3);
+	
+	% Erode and binarize image
+	imClosed = imclose(imNozzle, se);
+	
+	% Show images
+	figure;
+	for i=0.1:0.1:1.0
+	imBinarized = imbinarize(imClosed, "adaptive", "Sensitivity", i); 
+	subplot(2, 5, i*10); imshow(imBinarized)
+	title(i);
+	end
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Código de exemplo em Matlab}, label={lst:codigo}]
+	% Select sensivity to segmentation and color to highlight circles
+	sensivity = 1;
+	edgeColor = [0 1 0];
+	backgroundColor = [1.000 1.000 0.067];
+	textColor = [0 1 0];
+\end{lstlisting}
+
+	
 
 \section*{Considerações Finais}
 %Esse trabalho teve como objetivo analisar a eficiência das CNNs no reconhecimento de gestos com base em sinais de sEMG. Os fundamentos apresentados, bem como as metodologias de pré-processamento e conversão dos sinais em imagens - como o uso de janelas deslizantes e transformadas tempo-frequência - demonstraram impacto direto na performance dos modelos. Essas técnicas, aliadas aos benefícios das redes convolucionais, permitiram alcançar ótimos resultados, com acurácias superiores a 0,8 em pesquisas recentes.
