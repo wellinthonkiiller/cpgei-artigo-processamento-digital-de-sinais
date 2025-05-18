@@ -10,7 +10,7 @@
 \usepackage{graphicx}
 \usepackage{textcomp}
 \usepackage{listings}
-\usepackage{xcolor}
+\usepackage{multicol}
 \usepackage{xcolor}
 \usepackage[main=brazil,english]{babel}
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
@@ -132,14 +132,14 @@ Nesse contexto, este trabalho tem como objetivo demonstrar a aplicação de téc
 
 A Figura \ref{fig:bico-injetor-real} ilustra um modelo de bico injetor, um dos principais componentes de um sistema de combustão a diesel. Como o foco deste trabalho é a aplicação de técnicas de processamento de imagens, o funcionamento do injetor não será abordado em detalhes. No entanto, a Figura \ref{fig:bico-injetor} destaca alguns de seus componentes.
 
-A Figura \ref{fig:bico-injetor} destaca as seguintes regiões do bico injetor: base (1), haste (2), cúpula (3), furos de fixação (4 e 5), furo de injeção de combustível (6), guia do corpo (7), furo cego (8), assento da agulha (9), ponta da agulha (10), guia da agulha (11) e espiga da agulha (12) \cite{Girotto2023}. Os furos de fixação (4 e 5) e injeção de combustível (6) estão localizados em uma região chamada de superfície de vedação, conforme ilustra a Figura \ref{fig:superficie-de-vedacao}.
-
-\begin{figure}[t]
- 	\centering
- 	\includegraphics[scale=0.5]{Images/bico-injetor-real.png}
- 	\caption{Bico injetor diesel. Fonte: \cite{karhub}.}
- 	\label{fig:bico-injetor-real}
+\begin{figure}[b]
+	\centering
+	\includegraphics[scale=0.4]{Images/bico-injetor-real.png}
+	\caption{Bico injetor diesel. Fonte: \cite{karhub}.}
+	\label{fig:bico-injetor-real}
 \end{figure}
+
+A Figura \ref{fig:bico-injetor} destaca as seguintes regiões do bico injetor: base (1), haste (2), cúpula (3), furos de fixação (4 e 5), furo de injeção de combustível (6), guia do corpo (7), furo cego (8), assento da agulha (9), ponta da agulha (10), guia da agulha (11) e espiga da agulha (12) \cite{Girotto2023}. Os furos de fixação (4 e 5) e injeção de combustível (6) estão localizados em uma região chamada de superfície de vedação, conforme ilustra a Figura \ref{fig:superficie-de-vedacao}.
  
 \begin{figure}[t]
 	\centering
@@ -151,7 +151,7 @@ A Figura \ref{fig:bico-injetor} destaca as seguintes regiões do bico injetor: b
 \begin{figure}[t]
 	\centering
 	\includegraphics[scale=0.10]{Images/superficie-de-vedacao.jpg}
-	\caption{Bico injetor diesel}
+	\caption{Superfície de vedação de um bico injetor diesel}
 	\label{fig:superficie-de-vedacao}
 \end{figure}
 
@@ -161,46 +161,64 @@ Nesta seção, são abordadas as técnicas de processamento de imagem utilizadas
 
 \subsubsection{Carregar imagem} esta seção de código descreve as etapas para o carregamento e a visualização da imagem. No código apresentado, foi carregada uma imagem correspondente à Figura \ref{fig:superficie-de-vedacao}. 
 
-\begin{lstlisting}[caption={Carregar e visualizar a imagem}, label={lst:codigo}]
-	% Clear workspace
-	clear
-	
-	% Set working directory
-	workDir = pwd + "/ProjetoFinal/Images/";
-	
-	% Read image
-	imName = "Image0001.jpg";
-	imNozzle = imread(workDir + imName);
-	
-	% Show image
-	imshow(imNozzle);
+\begin{lstlisting}[caption={Carregar e visualizar a imagem}, label={lst:carregar-imagem}]
+% Clear workspace
+clear
+
+% Set working directory
+workDir = pwd + "/ProjetoFinal/Images/";
+
+% Read image
+imName = "Image0001.jpg";
+imNozzle = imread(workDir + imName);
+
+% Show image
+imshow(imNozzle);
 \end{lstlisting}
 
-\subsection{Filtrar a imagem} esta seção de código descreve as etapas para pré-processamento da imagem, utilizando filtros.
+\subsubsection{Filtrar a imagem} esta seção de código descreve as etapas para pré-processamento da imagem, utilizando filtros. No código apresentado, primeiramente foi construído o elemento "se" em formato de disco por meio da função \textit{strel} para aplicação do filtro. Posteriormente, o elemento "se" foi utilizado em um filtro de \textit{closing}, produzindo a imagem ilustrada na Figura \ref{fig:imClosed}. Por fim, foi criado um laço \textit{for} para avaliar qual melhor valor de sensibilidade para binarização da imagem. A Figura \ref{fig:sensivities} ilustra as imagens obtidas com os diferentes valores de sensibilidade.
 
-\begin{lstlisting}[caption={Carregar e visualizar a imagem}, label={lst:codigo}]
-	% Create structuring element
-	se = strel('disk', 3);
-	
-	% Erode and binarize image
-	imClosed = imclose(imNozzle, se);
-	
-	% Show images
-	figure;
-	for i=0.1:0.1:1.0
-	imBinarized = imbinarize(imClosed, "adaptive", "Sensitivity", i); 
+%\centering
+\begin{lstlisting}[caption={Filtrar a imagem e analisar sensibilidade para binarização}, label={lst:codigo}]
+% Create structuring element
+se = strel('disk', 3);
+
+% Apply closing morphology and show image
+imClosed = imclose(imNozzle, se);
+figure; imshow(imClosed);
+
+% Show binarized images with different sensitivities
+% Increment sensivity by 0.1
+figure;
+for i=0.1:0.1:1.0
+	imBinarized = imbinarize(imClosed, ...
+	"adaptive", "Sensitivity", i); 
 	subplot(2, 5, i*10); imshow(imBinarized)
 	title(i);
-	end
+end
 \end{lstlisting}
 
-\begin{lstlisting}[caption={Código de exemplo em Matlab}, label={lst:codigo}]
-	% Select sensivity to segmentation and color to highlight circles
-	sensivity = 1;
-	edgeColor = [0 1 0];
-	backgroundColor = [1.000 1.000 0.067];
-	textColor = [0 1 0];
-\end{lstlisting}
+\begin{figure}[h]
+	\centering
+	\includegraphics[scale=0.18]{Images/Image0000_closed.png}
+	\caption{Imagem após aplicação de filtro de \textit{closing}}
+	\label{fig:imClosed}
+\end{figure}
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[scale=0.65]{Images/Image0000_sensitivity.png}
+	\caption{Imagem após aplicação de filtro de \textit{closing}}
+	\label{fig:sensivities}
+\end{figure}
+
+%\begin{lstlisting}[caption={Código de exemplo em Matlab}, label={lst:codigo}]
+%% Select sensivity to segmentation and color to highlight circles
+%sensivity = 1;
+%edgeColor = [0 1 0];
+%backgroundColor = [1.000 1.000 0.067];
+%textColor = [0 1 0];
+%\end{lstlisting}
 
 	
 
