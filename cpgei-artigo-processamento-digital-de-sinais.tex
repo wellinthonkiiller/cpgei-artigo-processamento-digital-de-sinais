@@ -159,9 +159,9 @@ A Figura \ref{fig:bico-injetor} destaca as seguintes regiões do bico injetor: b
 
 Nesta seção, são abordadas as técnicas de processamento de imagem utilizadas para detecção dos furos presentes na superfície de vedação do bico injetor, utilizando o \textit{software} Matlab.  
 
-\subsubsection{Carregar imagem} esta seção de código descreve as etapas para o carregamento e a visualização da imagem. No código apresentado, foi carregada uma imagem correspondente à Figura \ref{fig:superficie-de-vedacao}. 
+\subsubsection{Carregar imagem} esta seção de código descreve as etapas para o carregamento e a visualização da imagem. No Código \ref{lst:codigo-read-image} apresentado, foi carregada uma imagem correspondente à Figura \ref{fig:superficie-de-vedacao}. 
 
-\begin{lstlisting}[caption={Carregar e visualizar a imagem}, label={lst:carregar-imagem}]
+\begin{lstlisting}[caption={Carregamento e visualização da imagem}, label={lst:codigo-read-image}]
 % Clear workspace
 clear
 
@@ -176,10 +176,9 @@ imNozzle = imread(workDir + imName);
 imshow(imNozzle);
 \end{lstlisting}
 
-\subsubsection{Filtrar a imagem} esta seção de código descreve as etapas para pré-processamento da imagem, utilizando filtros. No código apresentado, primeiramente foi construído o elemento "se" em formato de disco por meio da função \textit{strel} para aplicação do filtro. Posteriormente, o elemento "se" foi utilizado em um filtro de \textit{closing}, produzindo a imagem ilustrada na Figura \ref{fig:imClosed}. Por fim, foi criado um laço \textit{for} para avaliar qual melhor valor de sensibilidade para binarização da imagem. A Figura \ref{fig:sensivities} ilustra as imagens obtidas com os diferentes valores de sensibilidade.
+\subsubsection{Filtrar a imagem} esta seção de código apresenta as etapas de pré-processamento da imagem, utilizando filtros, conforme demonstrado no Código \ref{lst:codigo-filtering}. Inicialmente foi construído o elemento estrutural "se" em formato de disco por meio da função \textit{strel} para aplicação do filtro. Em seguida, o elemento "se" foi utilizado em um filtro de \textit{closing}, gerando a imagem apresentada na Figura \ref{fig:imClosed}. Por fim, foi implementado um laço \textit{for} para determinar o valor de sensibilidade mais adequado para a binarização da imagem, utilizando a função \textit{imbinarize}. A Figura \ref{fig:sensivities} mostra as imagens binarizadas, obtidas com diferentes valores de sensibilidade.
 
-%\centering
-\begin{lstlisting}[caption={Filtrar a imagem e analisar sensibilidade para binarização}, label={lst:codigo}]
+\begin{lstlisting}[caption={Filtragem e análise da sensibilidade para binarização}, label={lst:codigo-filtering}]
 % Create structuring element
 se = strel('disk', 3);
 
@@ -211,6 +210,56 @@ end
 	\caption{Imagem após aplicação de filtro de \textit{closing}}
 	\label{fig:sensivities}
 \end{figure}
+
+\subsubsection{Segmentação dos círculos} esta seção apresenta as etapas para segmentação dos círculos na imagem e o cálculo dos ângulos de cada um dos círculos em relação ao eixo X, conforme demonstrado no Código \ref{lst:codigo-segmentation}. Inicialmente foi definida a variável de sensibilidade como 1.0, conforme indicado na análise realizada no Código \ref{lst:codigo-filtering}) e as variáveis de cores para visualização dos círculos (verde) e dos textos na imagem (branco e azul). Em seguida, a imagem foi binarizada utilizando a função \textit{imbinarize} com o método adaptativo. Após a binarização, empregou-se a função \textit{imFindCircles} para detectar os círculos na imagem, especificando o intervalo de raio entre 50 a 200 \textit{pixels}.
+
+
+\begin{lstlisting}[caption={Segmentação dos círculos e cálculo dos ângulos}, label={lst:codigo-segmentation}]
+% Select sensivity to segmentation 
+% Select colors to draw circles and text
+sensivity = 1;
+edgeColor = [0 1 0];
+backgroundColor = [0 0 1];
+textColor = [1 1 1];
+
+% Segment image and compute area
+imSegmented = imbinarize(imClosed, "adaptive", ...
+		      "Sensitivity", sensivity); 
+[c, r] = imfindcircles(imSegmented, [50,200], ...
+  	  	 "ObjectPolarity", "dark");
+areas = (pi)*r.^2;
+
+% Get number of circles
+numOfCircles = size(c, 1);
+
+% Image center
+imCenterX = 700;
+imCenterY = 700;
+
+% Show images and found circles
+figure;
+imshow(imNozzle);
+title('Original');
+imshow(imSegmented); 
+viscircles(c, r, 'EdgeColor', edgeColor);
+title('Segmented');
+
+hold on;
+for i=1:1:numOfCircles
+	% Draw circle contour
+	x = c(i, 1);
+	y = c(i, 2);
+	
+	% Compute angles between circles and axis X 
+	theta = atan2(y - imCenterX, x - imCenterY);
+	deg = rad2deg(theta);
+	text(c(i, 1)+r(i), c(i, 2)+r(i), ...
+		 num2str(i)+"="+num2str(deg) + '\circ', ...
+		 "BackgroundColor", backgroundColor, ...
+		 "Color", textColor, "FontWeight", "bold");
+end
+hold off;
+\end{lstlisting}
 
 %\begin{lstlisting}[caption={Código de exemplo em Matlab}, label={lst:codigo}]
 %% Select sensivity to segmentation and color to highlight circles
