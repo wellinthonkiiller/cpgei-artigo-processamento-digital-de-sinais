@@ -207,14 +207,13 @@ end
 \begin{figure}[h]
 	\centering
 	\includegraphics[scale=0.65]{Images/Image0000_sensitivity.png}
-	\caption{Imagem após aplicação de filtro de \textit{closing}}
+	\caption{Imagens binarizadas com diferentes níveis de sensibilidade}
 	\label{fig:sensivities}
 \end{figure}
 
-\subsubsection{Segmentação dos círculos} esta seção apresenta as etapas para segmentação dos círculos na imagem e o cálculo dos ângulos de cada um dos círculos em relação ao eixo X, conforme demonstrado no Código \ref{lst:codigo-segmentation}. Inicialmente foi definida a variável de sensibilidade como 1.0, conforme indicado na análise realizada no Código \ref{lst:codigo-filtering}) e as variáveis de cores para visualização dos círculos (verde) e dos textos na imagem (branco e azul). Em seguida, a imagem foi binarizada utilizando a função \textit{imbinarize} com o método adaptativo. Após a binarização, empregou-se a função \textit{imFindCircles} para detectar os círculos na imagem, especificando o intervalo de raio entre 50 a 200 \textit{pixels}.
+\subsubsection{Segmentar os círculos} esta seção apresenta as etapas para segmentação dos círculos na imagem, conforme demonstrado no Código \ref{lst:codigo-segmentation}. Inicialmente foi definida a variável de sensibilidade como 1.0, conforme indicado na análise realizada no Código \ref{lst:codigo-filtering}, e estabelecidas as variáveis de cores para visualização dos círculos (verde) e dos textos na imagem (branco e azul). Em seguida, a imagem foi binarizada utilizando a função \textit{imbinarize} com o método adaptativo. Após a binarização, empregou-se a função \textit{imFindCircles} para detectar os círculos na imagem, especificando o intervalo de raio entre 50 e 200 \textit{pixels} e definindo a polaridade dos objetos como escura. Posteriormente, a função \textit{viscircles} foi utilizada para visualizar os círculos encontrados. Por fim, a Figura \ref{fig:segmented} apresenta a imagem após as etapas de segmentação.
 
-
-\begin{lstlisting}[caption={Segmentação dos círculos e cálculo dos ângulos}, label={lst:codigo-segmentation}]
+\begin{lstlisting}[caption={Segmentação dos círculos escuros}, label={lst:codigo-segmentation}]
 % Select sensivity to segmentation 
 % Select colors to draw circles and text
 sensivity = 1;
@@ -227,30 +226,33 @@ imSegmented = imbinarize(imClosed, "adaptive", ...
 		      "Sensitivity", sensivity); 
 [c, r] = imfindcircles(imSegmented, [50,200], ...
   	  	 "ObjectPolarity", "dark");
-areas = (pi)*r.^2;
 
-% Get number of circles
-numOfCircles = size(c, 1);
-
-% Image center
-imCenterX = 700;
-imCenterY = 700;
-
-% Show images and found circles
+% Show images and circles found
 figure;
 imshow(imNozzle);
 title('Original');
 imshow(imSegmented); 
 viscircles(c, r, 'EdgeColor', edgeColor);
 title('Segmented');
+\end{lstlisting}
 
+\begin{figure}[t]
+	\centering
+	\includegraphics[scale=0.65]{Images/Image0000_segmented.png}
+	\caption{Imagem após segmentação e detecção dos círculos escuros}
+	\label{fig:segmented}
+\end{figure}
+
+\subsubsection{Calcular os ângulos dos círculos} esta seção apresenta as etapas para o cálculo do ângulo de cada círculo encontrado, conforme demonstrado no Código \ref{lst:codigo-compute-angle}. Primeiramente, realizou-se o cálculo dos ângulos dos círculos em relação ao centro da imagem. Como a imagem possui dimensões de 1400x1400 \textit{pixels}, o centro está localizado na coordenada (700, 700). Para realizar o cálculo, utilizou-se a função \textit{atan2}, que retorna o valor de ângulo em radianos, posteriormente convertido para graus com a função \textit{rad2deg}. Por fim, o valor do ângulo obtido é exibido na imagem, seguindo as cores especificadas no Código \ref{lst:codigo-segmentation}, como ilustrado na Figura \ref{fig:compute-angle}.
+
+\begin{lstlisting}[caption={Cálculo dos ângulos em relação ao centro da imagem}, label={lst:codigo-compute-angle}]
 hold on;
 for i=1:1:numOfCircles
 	% Draw circle contour
 	x = c(i, 1);
 	y = c(i, 2);
 	
-	% Compute angles between circles and axis X 
+	% Compute angles between circles and image center 
 	theta = atan2(y - imCenterX, x - imCenterY);
 	deg = rad2deg(theta);
 	text(c(i, 1)+r(i), c(i, 2)+r(i), ...
@@ -261,18 +263,17 @@ end
 hold off;
 \end{lstlisting}
 
-%\begin{lstlisting}[caption={Código de exemplo em Matlab}, label={lst:codigo}]
-%% Select sensivity to segmentation and color to highlight circles
-%sensivity = 1;
-%edgeColor = [0 1 0];
-%backgroundColor = [1.000 1.000 0.067];
-%textColor = [0 1 0];
-%\end{lstlisting}
-
-	
+\begin{figure}[b]
+	\centering
+	\includegraphics[scale=0.65]{Images/Image0000_computed.png}
+	\caption{Imagem após o cálculo dos ângulos}
+	\label{fig:compute-angle}
+\end{figure}
 
 \section*{Considerações Finais}
-%Esse trabalho teve como objetivo analisar a eficiência das CNNs no reconhecimento de gestos com base em sinais de sEMG. Os fundamentos apresentados, bem como as metodologias de pré-processamento e conversão dos sinais em imagens - como o uso de janelas deslizantes e transformadas tempo-frequência - demonstraram impacto direto na performance dos modelos. Essas técnicas, aliadas aos benefícios das redes convolucionais, permitiram alcançar ótimos resultados, com acurácias superiores a 0,8 em pesquisas recentes.
+Este trabalho teve como objetivo demonstrar a aplicação de técnicas de processamento de imagens para detecção de furos na superfície de vedação de bicos injetores diesel. Os filtros morfológicos e funções empregadas comprovaram a eficácia das técnicas utilizadas, evidenciando o potencial dessas abordagens para aplicações de gravação a laser voltadas à rastreabilidade de produtos.
+
+Neste contexto, após a detecção dos furos e o cálculo de seus ângulos, é possível transferir essas informações para uma gravadora a laser por meio de protocolos de comunicação industrial. Dessa forma, garante-se que a gravação seja realizada na área mais adequada que, nesse caso, corresponde à maior região livre de furos ou maior distancia angular entre dois furos. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %\section*{References}
