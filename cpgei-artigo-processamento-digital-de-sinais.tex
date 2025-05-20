@@ -127,7 +127,7 @@ Os bicos injetores desempenham uma função fundamental nos sistemas de combust�
 
 Nesse contexto, este trabalho tem como objetivo demonstrar a aplicação de técnicas de processamento de imagens para detectar furos na superfície de vedação de bicos injetores diesel, uma área estratégica para a gravação a laser com fins de rastreabilidade. O artigo está organizado da seguinte forma: na Seção 2.A, é apresentada uma breve explicação sobre os bicos injetores; an Seção 2.B, são descritas as técnicas de processamento de imagens utilizadas; por fim, a Seção de Considerações Finais encerra o artigo, destacando as contribuições do estudo.
 
-\section{Metodologia}
+\section{Materiais e Métodos}
 \subsection{Bico Injetor Diesel}
 
 A Figura \ref{fig:bico-injetor-real} ilustra um modelo de bico injetor, um dos principais componentes de um sistema de combustão a diesel. Como o foco deste trabalho é a aplicação de técnicas de processamento de imagens, o funcionamento do bico injetor não será abordado em detalhes. No entanto, a Figura \ref{fig:bico-injetor} destaca alguns de seus componentes.
@@ -155,9 +155,13 @@ A Figura \ref{fig:bico-injetor} destaca as seguintes regiões do bico injetor: b
 	\label{fig:superficie-de-vedacao}
 \end{figure}
 
-\subsection{Processamento de Imagem}
+\subsection{Materiais}
 
-Nesta seção, são abordadas as técnicas de processamento de imagem utilizadas para detecção dos furos presentes na superfície de vedação do bico injetor, utilizando o \textit{software} Matlab.  
+Para a aplicação das técnicas de processamento de imagens, foram desenvolvidos \textit{scripts} em Matlab, executados em um computador pessoal com as seguintes especificações: processador Intel Core i7-7500U de 2 núcleos a 2,90GHz; 16GB de memória RAM; placa de vídeo NVIDIA GeForce 940MX com 4GB de memória dedicada; e sistema operacional Windows 10 Home. 
+
+\subsection{Processamento de Imagens}
+
+Nesta seção, são detalhadas as técnicas de processamento de imagem utilizadas para detecção dos furos presentes na superfície de vedação do bico injetor, utilizando o \textit{software} Matlab.  
 
 \subsubsection{Carregar imagem} esta seção de código descreve as etapas para o carregamento e a visualização da imagem. No Código \ref{lst:codigo-read-image} apresentado, foi carregada uma imagem correspondente à Figura \ref{fig:superficie-de-vedacao}. 
 
@@ -189,12 +193,12 @@ figure; imshow(imClosed);
 title('Closed');
 
 % Show binarized images with different sensitivities
-% Increment sensivity by 0.1
+% Increment sensitivity by 0.1
 figure;
 for i=0.1:0.1:1.0
 	imBinarized = imbinarize(imClosed, ...
 	"adaptive", "Sensitivity", i); 
-	subplot(2, 5, i*10); imshow(imBinarized)
+	subplot(2, 5, i*10); imshow(imBinarized);
 	title(i);
 end
 \end{lstlisting}
@@ -233,11 +237,11 @@ imSegmented = imbinarize(imClosed, "adaptive", ...
 figure; imshow(imNozzle);
 title('Original');
 figure; imshow(imSegmented);  
-viscircles(c, r, 'EdgeColor', edgeColor);
+viscircles(c, r, "EdgeColor", edgeColor);
 title('Segmented');
 \end{lstlisting}
 
-\begin{figure}[t]
+\begin{figure}[b]
 	\centering
 	\includegraphics[scale=0.70]{Images/Image0000_segmented.png}
 	\caption{Imagem após segmentação e detecção dos círculos escuros}
@@ -247,6 +251,14 @@ title('Segmented');
 \subsubsection{Calcular os ângulos dos círculos} esta seção apresenta as etapas para o cálculo do ângulo de cada círculo encontrado, conforme demonstrado no Código \ref{lst:codigo-compute-angle}. Primeiramente, realizou-se o cálculo dos ângulos dos círculos em relação ao centro da imagem. Como a imagem possui dimensões de 1400x1400 \textit{pixels}, o centro está localizado na coordenada (700, 700). Para realizar o cálculo, utilizou-se a função \textit{atan2}, que retorna o valor de ângulo em radianos, posteriormente convertido para graus com a função \textit{rad2deg}. Por fim, o valor do ângulo obtido é exibido na imagem, seguindo as cores especificadas no Código \ref{lst:codigo-segmentation}, como ilustrado na Figura \ref{fig:compute-angle}.
 
 \begin{lstlisting}[caption={Cálculo dos ângulos em relação ao centro da imagem}, label={lst:codigo-compute-angle}]
+% Get number of circles
+numOfCircles = size(c, 1);
+
+% Image center
+imCenterX = 700;
+imCenterY = 700;
+	
+% Compute and show angles
 hold on;
 for i=1:1:numOfCircles
 	% Draw circle contour
@@ -274,7 +286,7 @@ hold off;
 \section*{Considerações Finais}
 Este trabalho teve como objetivo demonstrar a aplicação de técnicas de processamento de imagens para a detecção de furos na superfície de vedação de bicos injetores diesel. Os filtros morfológicos e as funções utilizadas comprovaram o potencial dessas abordagens para aplicações de gravação a laser voltadas à rastreabilidade de produtos.
 
-Após a detecção dos furos e o cálculo de seus ângulos, é possível transferir essas informações para uma gravadora a laser por meio de protocolos de comunicação industrial. Dessa maneira, garante-se que a gravação ocorra na área mais apropriada, que, nesse caso, corresponde à maior região livre de furos ou à maior distancia angular entre dois furos. 
+Após a detecção dos furos e o cálculo de seus ângulos, é possível transferir esses dados para uma gravadora a laser por meio de protocolos de comunicação industrial. Dessa maneira, garante-se que a gravação ocorra na área mais apropriada, que, nesse caso, corresponde à maior região livre de furos ou à maior distancia angular entre dois furos. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %\section*{References}
